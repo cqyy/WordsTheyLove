@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var env = require('jsdom').env
+  var env = require('node-jsdom').env
     , html = '<html><body><h1>Hello World!</h1><p class="hello">Heya Big World!</body></html>'
     ;
 
