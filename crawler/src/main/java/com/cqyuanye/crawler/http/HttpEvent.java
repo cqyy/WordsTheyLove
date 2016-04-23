@@ -1,13 +1,18 @@
 package com.cqyuanye.crawler.http;
 
-import com.cqyuanye.common.Event;
+import com.cqyuanye.common.dispatcher.Event;
 
 /**
  * Created by yuanye on 2016/4/23.
  */
-public interface HttpEvent extends Event{
+public abstract class HttpEvent implements Event{
 
-    String url();
+    public abstract String url();
 
-    Enum contentType();
+    public abstract Callback callback();
+
+    @Override
+    public Class eventType() {
+        return HttpEvent.class;
+    }
 }

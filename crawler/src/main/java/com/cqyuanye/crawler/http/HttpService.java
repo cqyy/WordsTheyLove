@@ -1,11 +1,8 @@
 package com.cqyuanye.crawler.http;
 
-import com.cqyuanye.common.Dispatcher;
+import com.cqyuanye.common.dispatcher.Dispatcher;
 import com.cqyuanye.common.Service;
-import com.cqyuanye.crawler.parser.ParseKuwoListEvent;
-import com.cqyuanye.crawler.parser.ParseKuwoLrcEvent;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -64,8 +61,17 @@ public class HttpService implements Service {
             client = HttpClients.createDefault();
 
             while (!Thread.currentThread().isInterrupted()){
+
+                HttpEvent event;
                 try {
-                    HttpEvent event = getEvents.take();
+                    event = getEvents.take();
+                } catch (InterruptedException e) {
+                    if (Thread.currentThread().isInterrupted()){
+                        break;
+                    }
+                    continue;
+                }
+                try {
                     String url = event.url();
                     HttpGet get = new HttpGet(url);
                     HttpResponse res = client.execute(get);
@@ -80,22 +86,10 @@ public class HttpService implements Service {
                             sb.append(new String(buf,0,read,"utf-8"));
                         }
 
-                        if(event.contentType() == HttpEventType.KUWO_LIST){
-                            dispatcher.handle(new ParseKuwoListEvent(sb.toString()));
-                        }else if (event.contentType() == HttpEventType.KUWO_LRC){
-                            dispatcher.handle(new ParseKuwoLrcEvent(sb.toString()));
-                        }else {
-                            //should not get here
-                            assert false;
-                        }
+                       event.callback().onSuccess(sb.toString(),event);
                     }
-
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } catch (ClientProtocolException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    event.callback().onFailed(e.getMessage(),event);
                 }
             }
         }

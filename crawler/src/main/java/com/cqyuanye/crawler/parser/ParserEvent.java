@@ -1,6 +1,6 @@
 package com.cqyuanye.crawler.parser;
 
-import com.cqyuanye.common.Event;
+import com.cqyuanye.common.dispatcher.Event;
 
 /**
  * Created by yuanye on 2016/4/23.
@@ -8,5 +8,4 @@ import com.cqyuanye.common.Event;
 public interface ParserEvent extends Event{
 
     String html();
-    Enum   type();
 }

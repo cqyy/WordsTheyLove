@@ -1,5 +1,6 @@
-!/node_modules
+/node_modules
 
-!.idea
+.idea
 !2.1
-!*.class
+*.class
+crawler/target

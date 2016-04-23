@@ -1,4 +1,4 @@
-package com.cqyuanye.common;
+package com.cqyuanye.common.dispatcher;
 
 /**
  * Created by yuanye on 2016/4/23.

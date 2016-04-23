@@ -1,4 +1,4 @@
-package com.cqyuanye.common;
+package com.cqyuanye.common.dispatcher;
 
 import java.util.Map;
 import java.util.concurrent.*;

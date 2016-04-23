@@ -5,5 +5,5 @@ package com.cqyuanye.crawler.parser;
  */
 public interface Parser {
 
-    void parse(String html);
+    void parse(ParserEvent event);
 }
