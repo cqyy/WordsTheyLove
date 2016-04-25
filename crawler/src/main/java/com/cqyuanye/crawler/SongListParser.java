@@ -2,10 +2,9 @@ package com.cqyuanye.crawler;
 
 import com.cqyuanye.common.dispatcher.Dispatcher;
 import com.cqyuanye.common.dispatcher.Event;
-import com.cqyuanye.crawler.LrcHttpEvent;
+import com.cqyuanye.common.dispatcher.EventHandler;
 import com.cqyuanye.crawler.http.Callback;
 import com.cqyuanye.crawler.http.HttpEvent;
-import com.cqyuanye.crawler.parser.Parser;
 import com.cqyuanye.crawler.parser.ParserEvent;
 
 import java.util.regex.Matcher;
@@ -14,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * Created by kali on 2016/4/24.
  */
-public class SongListParser implements Parser {
+public class SongListParser implements EventHandler {
 
     private final Dispatcher dispatcher;
 
@@ -24,8 +23,10 @@ public class SongListParser implements Parser {
 
 
     @Override
-    public void parse(ParserEvent event) {
-        String html = event.html();
+    public void handle(Event event) {
+        
+        ParserEvent pe = (ParserEvent)event;
+        String html = pe.html();
         String regex = "<a href=\"(http://[\\w\\d./\\?=]+)\".*>([^>]+)</a>";
         Pattern pattern = Pattern.compile(regex);
 
@@ -39,12 +40,13 @@ public class SongListParser implements Parser {
                 HttpEvent httpEvent = new LrcHttpEvent(songUrl, new Callback() {
                     @Override
                     public void onSuccess(String html, Event event) {
-                        //TODO
+                        LrcParserEvent le = new LrcParserEvent(html);
+                        dispatcher.handle(le);
                     }
 
                     @Override
                     public void onFailed(String err, Event event) {
-                        //TODO
+                        System.out.println(err);
                     }
                 });
                 dispatcher.handle(httpEvent);

@@ -1,7 +1,9 @@
 package com.cqyuanye.crawler;
 
-import com.cqyuanye.crawler.http.Callback;
-import com.cqyuanye.crawler.parser.Parser;
+import com.cqyuanye.common.dispatcher.Dispatcher;
+import com.cqyuanye.common.dispatcher.Event;
+import com.cqyuanye.common.dispatcher.EventHandler;
+import com.cqyuanye.crawler.fs.FSEvent;
 import com.cqyuanye.crawler.parser.ParserEvent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,18 +12,27 @@ import org.jsoup.nodes.Element;
 /**
  * Created by kali on 2016/4/24.
  */
-public class LrcParser implements Parser {
-    @Override
-    public void parse(ParserEvent event) {
+public class LrcParser implements EventHandler {
 
-        Document doc = Jsoup.parse(event.html());
+    private final Dispatcher dispatcher;
+
+    public LrcParser(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+
+    @Override
+    public void handle(Event event) {
+        ParserEvent pe = (ParserEvent)event;
+
+        Document doc = Jsoup.parse(pe.html());
         String name = doc.select("#lrcName").first().text();
         String singer = doc.select(".artist span a").first().text();
         String lrc;
         StringBuilder sb = new StringBuilder();
         for(Element element :doc.select(".lrcItem")){
             sb.append(element.text());
-            sb.append("\n");
+            sb.append("\r\n");
         }
 
         lrc = sb.toString();
@@ -30,12 +41,12 @@ public class LrcParser implements Parser {
                 && singer != null && singer.trim().length() > 0
                 && lrc.trim().length() > 0){
 
-            //TODO change to real handling
-            System.out.println("∏Ë√˚£∫" + name);
-            System.out.println("∏Ë ÷£∫" + singer);
-            System.out.println("∏Ë¥ £∫\n " + lrc);
+            String filename = name + "_" + singer + ".txt";
+
+            FSEvent fsEvent = new LrcFSEvent(filename,lrc);
+            dispatcher.handle(fsEvent);
         }else{
-            System.out.println("Parse event " + event + " failed.");
+            System.out.println("Parse event " + pe + " failed.");
         }
     }
 }

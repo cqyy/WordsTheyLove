@@ -2,6 +2,7 @@ package com.cqyuanye.crawler.http;
 
 import com.cqyuanye.common.dispatcher.Dispatcher;
 import com.cqyuanye.common.Service;
+import com.cqyuanye.common.dispatcher.Event;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -29,6 +30,7 @@ public class HttpService implements Service {
         this.dispatcher = dispatcher;
     }
 
+
     @Override
     public void start() {
         for (int i = 0; i < WORKER_NUM; i++){
@@ -41,6 +43,15 @@ public class HttpService implements Service {
     @Override
     public void shutdown() {
         workers.forEach(Thread::interrupt);
+    }
+
+    @Override
+    public void handle(Event e) {
+        try {
+            getEvents.put((HttpEvent)e);
+        } catch (InterruptedException e1) {
+            //do nothing
+        }
     }
 
     public void handle(HttpEvent event){

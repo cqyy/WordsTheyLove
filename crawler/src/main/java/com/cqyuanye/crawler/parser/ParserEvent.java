@@ -5,7 +5,8 @@ import com.cqyuanye.common.dispatcher.Event;
 /**
  * Created by yuanye on 2016/4/23.
  */
-public interface ParserEvent extends Event{
+public abstract class ParserEvent implements Event{
 
-    String html();
+    public abstract String html();
+
 }
