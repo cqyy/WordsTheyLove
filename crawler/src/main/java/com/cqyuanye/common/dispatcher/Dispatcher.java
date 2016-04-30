@@ -10,4 +10,6 @@ public interface Dispatcher {
     void registerEventHandler(Class eventType,EventHandler handler);
 
     EventHandler getHandler(Event event);
+
+    void close();
 }

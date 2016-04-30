@@ -12,7 +12,7 @@ import com.cqyuanye.crawler.http.Callback;
  */
 public class CrawlerLrcEventHandler implements EventHandler {
 
-    private final String baseURL = "http://www.kuwo.cn/artist/contentMusicsAjax?artistId=${singerID}&pn=1&rn=100";
+    private final String baseURL = "http://www.kuwo.cn/artist/contentMusicsAjax?artistId=${singerID}&pn=1&rn=10000";
     private final Dispatcher dispatcher;
 
     public CrawlerLrcEventHandler(Dispatcher dispatcher) {

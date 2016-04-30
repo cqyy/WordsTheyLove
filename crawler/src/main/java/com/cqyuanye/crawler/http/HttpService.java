@@ -4,16 +4,20 @@ import com.cqyuanye.common.dispatcher.Dispatcher;
 import com.cqyuanye.common.Service;
 import com.cqyuanye.common.dispatcher.Event;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by yuanye on 2016/4/23.
@@ -33,7 +37,7 @@ public class HttpService implements Service {
 
     @Override
     public void start() {
-        for (int i = 0; i < WORKER_NUM; i++){
+        for (int i = 0; i < WORKER_NUM; i++) {
             Thread thread = new CrawlerThread();
             workers.add(thread);
             thread.start();
@@ -48,21 +52,13 @@ public class HttpService implements Service {
     @Override
     public void handle(Event e) {
         try {
-            getEvents.put((HttpEvent)e);
+            getEvents.put((HttpEvent) e);
         } catch (InterruptedException e1) {
             //do nothing
         }
     }
 
-    public void handle(HttpEvent event){
-        try {
-            getEvents.put(event);
-        } catch (InterruptedException e) {
-            //do nothing
-        }
-    }
-
-    private class CrawlerThread extends Thread{
+    private class CrawlerThread extends Thread {
 
         private CloseableHttpClient client;
 
@@ -71,37 +67,44 @@ public class HttpService implements Service {
 
             client = HttpClients.createDefault();
 
-            while (!Thread.currentThread().isInterrupted()){
+            while (!Thread.interrupted()) {
 
                 HttpEvent event;
                 try {
-                    event = getEvents.take();
-                } catch (InterruptedException e) {
-                    if (Thread.currentThread().isInterrupted()){
-                        break;
-                    }
-                    continue;
-                }
-                try {
-                    String url = event.url();
-                    HttpGet get = new HttpGet(url);
-                    HttpResponse res = client.execute(get);
+                    event = getEvents.poll(5, TimeUnit.SECONDS);
+                    if (event != null) {
+                        try {
+                            String url = event.url();
+                            HttpGet get = new HttpGet(url);
+                            CloseableHttpResponse res = client.execute(get);
 
-                    if (res.getStatusLine().getStatusCode() == 200){
-                        StringBuilder sb = new StringBuilder();
-                        InputStream is = res.getEntity().getContent();
+                            if (res.getStatusLine().getStatusCode() == 200) {
+                                StringBuilder sb = new StringBuilder();
+                                InputStream is = res.getEntity().getContent();
 
-                        byte[] buf = new byte[1024];
-                        int read;
-                        while ( (read = is.read(buf)) > 0){
-                            sb.append(new String(buf,0,read,"utf-8"));
+                                byte[] buf = new byte[1024];
+                                int read;
+                                while ((read = is.read(buf)) > 0) {
+                                    sb.append(new String(buf, 0, read, "utf-8"));
+                                }
+                                event.callback().onSuccess(sb.toString(), event);
+                            }else{
+                                System.out.println(res.getStatusLine().getStatusCode());
+                            }
+                            res.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            event.callback().onFailed(e.getMessage(), event);
                         }
-
-                       event.callback().onSuccess(sb.toString(),event);
                     }
-                } catch (IOException e) {
-                    event.callback().onFailed(e.getMessage(),event);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
+            }
+            try {
+                client.close();
+            } catch (IOException e) {
+                //do nothing
             }
         }
     }

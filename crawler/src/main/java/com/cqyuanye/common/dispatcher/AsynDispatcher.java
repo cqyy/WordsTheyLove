@@ -40,11 +40,10 @@ public class AsynDispatcher implements Dispatcher {
         return handlers.get(event.eventType());
     }
 
-    public void shutdown(){
-      //  shutdown = true;
+    @Override
+    public void close() {
         executor.shutdown();
     }
-
 
     private class EventHandleThread implements Runnable{
 

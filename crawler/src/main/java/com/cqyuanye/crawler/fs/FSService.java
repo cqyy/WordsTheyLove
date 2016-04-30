@@ -59,39 +59,39 @@ public class FSService implements Service {
 
         @Override
         public void run() {
-            while (!Thread.currentThread().isInterrupted()){
-
-                FSEvent event;
-                OutputStream os = null;
+            while (!Thread.interrupted()){
                 try {
-                    event = events.poll(5, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    continue;
-                }
-
-                try{
-                    File file = new File(basePath,event.filename());
-                    if (!file.exists()){
-                        if(!file.createNewFile()){
-                            System.err.println("Create file failed. " + file.getAbsolutePath());
-                            continue;
-                        }
-                    }
-                    os = new FileOutputStream(file);
-                    byte[] content = event.content();
-                    os.write(content);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }finally {
-                    if (os != null){
-                        try {
-                            os.close();
+                    FSEvent event = events.poll(5, TimeUnit.SECONDS);
+                    if (event != null){
+                        OutputStream os = null;
+                        try{
+                            File file = new File(basePath,event.filename());
+                            if (!file.exists()){
+                                if(!file.createNewFile()){
+                                    System.err.println("Create file failed. " + file.getAbsolutePath());
+                                    continue;
+                                }
+                            }
+                            os = new FileOutputStream(file);
+                            byte[] content = event.content();
+                            os.write(content);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
                         } catch (IOException e) {
-                            //do nothing
+                            e.printStackTrace();
+                        }finally {
+                            if (os != null){
+                                try {
+                                    os.close();
+                                } catch (IOException e) {
+                                    //do nothing
+                                }
+                            }
                         }
                     }
+                } catch (InterruptedException e) {
+                    //reset interrupted signal
+                    Thread.currentThread().interrupt();
                 }
             }
         }

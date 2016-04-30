@@ -7,6 +7,7 @@ import com.cqyuanye.crawler.http.Callback;
 import com.cqyuanye.crawler.http.HttpEvent;
 import com.cqyuanye.crawler.parser.ParserEvent;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
  * Created by kali on 2016/4/24.
  */
 public class SongListParser implements EventHandler {
+
 
     private final Dispatcher dispatcher;
 

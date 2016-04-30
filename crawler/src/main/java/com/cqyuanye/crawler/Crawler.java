@@ -10,6 +10,8 @@ import com.cqyuanye.crawler.http.HttpService;
 import com.cqyuanye.crawler.lrc.CrawlerLrcEvent;
 import com.cqyuanye.crawler.lrc.CrawlerLrcEventHandler;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by yuanye on 2016/4/25.
  */
@@ -32,5 +34,16 @@ public class Crawler {
 
         CrawlerLrcEvent ce =new CrawlerLrcEvent("385");
         dispatcher.handle(ce);
+
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+//        System.out.println("Shutting down.....");
+//        fs.shutdown();
+//        http.shutdown();
+//        dispatcher.close();
+//        System.out.println("Bye-Bye");
     }
 }
